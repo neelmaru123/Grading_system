@@ -1,0 +1,17 @@
+{
+  "name": "grading_system",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "Grading_system_backend",
+    "Grading_system_frontend"
+  ],
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
