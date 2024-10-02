@@ -13,6 +13,10 @@ const assignmentSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    subject: {
+        type: String,
+        required: true
+    },
     facultyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Faculty"
@@ -31,4 +35,6 @@ const assignmentSchema = new mongoose.Schema({
     pendingStudentsCount: {
         type: Number
     }
-}, { timestamps: true });
+}, { timestamps: true }, {collection : "Assignments"});
+
+module.exports = mongoose.model("Assignment", assignmentSchema)

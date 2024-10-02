@@ -29,9 +29,12 @@ const studentSchema = new mongoose.Schema({
             },
             grade: {
                 type: String
+            },
+            remarks: {
+                type: String
             }
         }
     ]
-}, { timestamps: true });
+}, { timestamps: true }, { collection: "students" });
 
 module.exports = mongoose.model("Student", studentSchema);

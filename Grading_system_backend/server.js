@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const PORT = 5000;
 
 const connectDB = require("./config/DBconnection");
 
@@ -21,5 +22,14 @@ mongoose.connection.once("open", () => {
     console.log("connected to mongoDB");
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 })
+
+const studentRoutes = require("./routes/student_routes");
+const facultyRoutes = require("./routes/faculty_routes");
+const assignmentRoutes = require("./routes/assignment_routes");
+
+// define a simple route
+app.use("/students", studentRoutes);
+app.use("/faculties", facultyRoutes);
+app.use("/assignments", assignmentRoutes);
 
 

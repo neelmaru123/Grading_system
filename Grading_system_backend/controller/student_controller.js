@@ -10,7 +10,7 @@ const registerStudent = async (req, res) => {
         });
     }
 
-    const [name, email, password, rollNo, department, assignments] = req.body;
+    const { name, email, password, rollNo, department, assignments } = req.body;
 
     // Create a Student
     const student = new studentModel({
@@ -105,7 +105,7 @@ const updateStudent = async (req, res) => {
 
 // Delete a student with the specified studentId in the request
 const deleteStudent = async (req, res) => {
-    await studentModel.findByIdAndRemove(req.params.id)
+    await studentModel.findByIdAndDelete(req.params.id)
         .then(student => {
             if (!student) {
                 return res.status(404).send({
@@ -124,3 +124,35 @@ const deleteStudent = async (req, res) => {
             });
         });
 }
+
+const gradingQueue = require('../queues/gradingQueue');
+
+const uploadFile = (req, res) => {
+    if (req.files === undefined) {
+        return res.status(400).send('Please upload a file!');
+    }
+
+    console.log(req.files?.file[0].path);
+    
+    const filePath = req.files?.file[0].path;
+    const { studentId, assignmentId } = req.body;
+
+    // Add the job to the grading queue
+    gradingQueue.add({
+        studentId: studentId,
+        assignmentId: assignmentId,
+        filePath: filePath
+    });
+
+    res.status(200).send('File uploaded successfully. Grading will be processed.');
+};
+
+
+module.exports = {
+    registerStudent,
+    getAllStudents,
+    getStudentById,
+    updateStudent,
+    deleteStudent,
+    uploadFile
+};

@@ -13,6 +13,10 @@ const facultySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    department: {
+        type: String,
+        required: true
+    },
     assignments: [
         {
             assignmentId: {
@@ -21,6 +25,6 @@ const facultySchema = new mongoose.Schema({
             }
         }
     ]
-}, { timestamps: true });
+}, { timestamps: true }, { collection: "faculties" });
 
 module.exports = mongoose.model("Faculty", facultySchema);
