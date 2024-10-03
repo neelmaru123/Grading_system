@@ -133,7 +133,7 @@ const uploadFile = (req, res) => {
     }
 
     console.log(req.files?.file[0].path);
-    
+
     const filePath = req.files?.file[0].path;
     const { studentId, assignmentId } = req.body;
 
@@ -142,7 +142,12 @@ const uploadFile = (req, res) => {
         studentId: studentId,
         assignmentId: assignmentId,
         filePath: filePath
-    });
+    },
+        {
+            attempts: 3,  // Number of retries in case of failure
+            backoff: 5000 // Time (ms) to wait before retrying
+        }
+    );
 
     res.status(200).send('File uploaded successfully. Grading will be processed.');
 };

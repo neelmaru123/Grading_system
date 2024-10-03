@@ -26,10 +26,12 @@ mongoose.connection.once("open", () => {
 const studentRoutes = require("./routes/student_routes");
 const facultyRoutes = require("./routes/faculty_routes");
 const assignmentRoutes = require("./routes/assignment_routes");
+const authRoutes = require("./routes/auth_route");
 
 // define a simple route
 app.use("/students", studentRoutes);
 app.use("/faculties", facultyRoutes);
 app.use("/assignments", assignmentRoutes);
+app.use("/auth", authRoutes);
 
 
