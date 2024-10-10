@@ -11,6 +11,7 @@ gradingQueue.process(async (job) => {
   const { studentId, assignmentId, filePath } = job.data;
 
   try {
+    
     // const extractedText = await pdfParser(pdfBuffer);
     const extractedText = await extractTextAndImagesFromPDF(filePath);
 
