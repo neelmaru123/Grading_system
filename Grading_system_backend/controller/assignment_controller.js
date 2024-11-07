@@ -1,4 +1,5 @@
 const assignmentModel = require('../models/assignment_model');
+const studentModel = require('../models/student_model');
 
 const registerAssignment = async (req, res) => {
 
@@ -121,10 +122,35 @@ const deleteAssignment = async (req, res) => {
         });
 }
 
+const pendingStudents = async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        const assignment = await assignmentModel.findById(id).select('students');
+        if (!assignment) {
+            return res.status(404).json({ message: 'Assignment not found' });
+        }
+
+        const submittedStudentIds = assignment.students.map(student => student.studentId);
+        const pendingStudents = await studentModel.aggregate([
+            {
+                $match: {
+                    _id: { $nin: submittedStudentIds }
+                }
+            }
+        ]);
+
+        res.status(200).json(pendingStudents);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching pending assignments', error });
+    }
+}
+
 module.exports = {
     registerAssignment,
     getAllAssignments,
     getAssignmentById,
     updateAssignment,
-    deleteAssignment
+    deleteAssignment,
+    pendingStudents
 };

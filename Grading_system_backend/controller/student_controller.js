@@ -1,4 +1,5 @@
 const studentModel = require('../models/student_model');
+const assignmentModel = require('../models/assignment_model');
 
 // Create and Save a new Student
 const registerStudent = async (req, res) => {
@@ -152,6 +153,18 @@ const uploadFile = (req, res) => {
     res.status(200).send('File uploaded successfully. Grading will be processed.');
 };
 
+const pendingAssignments = async (req, res) => {
+    const { id } = req.body;
+    try {
+        const pendingAssignments = await assignmentModel.find({
+            'students.studentId': { $ne: id } // Only assignments where the student ID is not present
+        });
+        res.status(200).json(pendingAssignments);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching pending assignments', error });
+    }
+}
+
 
 module.exports = {
     registerStudent,
@@ -159,5 +172,6 @@ module.exports = {
     getStudentById,
     updateStudent,
     deleteStudent,
-    uploadFile
+    uploadFile,
+    pendingAssignments
 };

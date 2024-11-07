@@ -7,7 +7,8 @@ const {
     getAllAssignments,
     getAssignmentById,
     updateAssignment,
-    deleteAssignment
+    deleteAssignment,
+    pendingStudents
 } = assignmentController;
 
 
@@ -21,5 +22,9 @@ router
     .get(getAssignmentById)
     .put(updateAssignment)
     .delete(deleteAssignment);
+
+router
+    .route("/pendingStudents")
+    .post(pendingStudents);
 
 module.exports = router;

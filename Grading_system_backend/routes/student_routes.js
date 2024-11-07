@@ -9,7 +9,8 @@ const {
     getStudentById,
     updateStudent,
     deleteStudent,
-    uploadFile
+    uploadFile,
+    pendingAssignments
 } = studentController;
 
 router
@@ -31,5 +32,9 @@ router
         ]),
         uploadFile
     );
+
+router
+    .route("/pendingAssignments")
+    .post(pendingAssignments);
 
 module.exports = router;

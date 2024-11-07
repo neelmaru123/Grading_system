@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": [
     "Grading_system_backend",
-    "Grading_system_frontend"
+    "grading_system_frontend"
   ],
   "description": "",
   "main": "index.js",
