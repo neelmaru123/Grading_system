@@ -22,6 +22,10 @@ const studentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    semester : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Semester"
+    },
     assignments: [
         {
             assignmentId: {
@@ -33,6 +37,9 @@ const studentSchema = new mongoose.Schema({
             },
             remarks: {
                 type: String
+            },
+            submissionDate: {
+                type: Date
             }
         }
     ]

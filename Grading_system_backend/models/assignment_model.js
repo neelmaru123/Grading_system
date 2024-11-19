@@ -13,9 +13,13 @@ const assignmentSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    subject: {
+    subjectName: {
         type: String,
         required: true
+    },
+    subjectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject"
     },
     facultyId: {
         type: mongoose.Schema.Types.ObjectId,

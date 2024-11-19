@@ -1,5 +1,6 @@
 const studentModel = require('../models/student_model');
 const assignmentModel = require('../models/assignment_model');
+const mongoose = require("mongoose");
 
 // Create and Save a new Student
 const registerStudent = async (req, res) => {
@@ -127,8 +128,11 @@ const deleteStudent = async (req, res) => {
 }
 
 const gradingQueue = require('../queues/gradingQueue');
+const extractTextAndImagesFromPDF = require('../workers/extract_pdf');
+const geminiIntegration = require('../workers/Gemini_Integration')
+const fs = require('fs')
 
-const uploadFile = (req, res) => {
+const uploadFile = async (req, res) => {
     if (req.files === undefined) {
         return res.status(400).send('Please upload a file!');
     }
@@ -138,23 +142,63 @@ const uploadFile = (req, res) => {
     const filePath = req.files?.file[0].path;
     const { studentId, assignmentId } = req.body;
 
-    // Add the job to the grading queue
-    gradingQueue.add({
-        studentId: studentId,
-        assignmentId: assignmentId,
-        filePath: filePath
-    },
-        {
-            attempts: 3,  // Number of retries in case of failure
-            backoff: 5000 // Time (ms) to wait before retrying
-        }
-    );
+    try {
 
-    res.status(200).send('File uploaded successfully. Grading will be processed.');
+        // const extractedText = await pdfParser(pdfBuffer);
+        const extractedText = await extractTextAndImagesFromPDF(filePath);
+
+        // Step 2: Call the Gemini API for grading
+        geminiGrade = await geminiIntegration(extractedText.text);
+
+        fs.unlink(filePath, (err) => {
+            if (err) console.error(`Failed to delete file: ${filePath}`, err);
+            else console.log(`File deleted: ${filePath}`);
+        });
+
+        console.log(geminiGrade.overallGrade);
+        console.log(geminiGrade.overallFeedback);
+
+        // Step 3: Update student's assignment grade in the database
+        await Student.findByIdAndUpdate(
+            studentId,
+            {
+                $push: {
+                    assignments: {
+                        assignmentId: assignmentId,
+                        grade: geminiGrade.overallGrade,
+                        remarks: geminiGrade.overallFeedback
+                    }
+                }
+            },
+            { new: true } // Return the updated document
+        )
+            .then((updatedStudent) => {
+                console.log(`Updated student: ${updatedStudent}`);
+            })
+
+        console.log(`Grading completed for student: ${studentId}`);
+    } catch (error) {
+        console.error(`Failed to process grading for student ${studentId}:`, error);
+    }
+
+    // // Add the job to the grading queue
+    // gradingQueue.add({
+    //     studentId: studentId,
+    //     assignmentId: assignmentId,
+    //     filePath: filePath
+    // },
+    //     {
+    //         attempts: 3,  
+    //         backoff: 5000 
+    //     }
+    // );
+
+    // res.status(200).send('File uploaded successfully. Grading will be processed.');
 };
 
 const pendingAssignments = async (req, res) => {
     const { id } = req.body;
+    
     try {
         const pendingAssignments = await assignmentModel.find({
             'students.studentId': { $ne: id } // Only assignments where the student ID is not present
@@ -165,6 +209,41 @@ const pendingAssignments = async (req, res) => {
     }
 }
 
+const submittedAssignment = async (req, res) => {
+    const { id } = req.body;
+
+    const studentAssignments = await studentModel.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(id) } },
+        { $unwind: "$assignments" },
+        { $match: { "assignments.grade": { $ne: null } } },
+        {
+            $lookup: {
+                from: "assignments",
+                localField: "assignments.assignmentId",
+                foreignField: "_id",
+                as: "assignmentDetails"
+            }
+        },
+        { $unwind: "$assignmentDetails" },
+        {
+            $project: {
+                _id: 0,
+                "assignmentDetails._id": 1,
+                "assignmentDetails.title": 1,
+                "assignmentDetails.description": 1,
+                "assignmentDetails.deadline": 1,
+                "assignmentDetails.subject": 1,
+                "assignments.grade": 1,
+                "assignments.remarks": 1,
+                "assignments.submissionDate": 1
+            }
+        }
+    ]);
+
+    res.status(200).json(studentAssignments);
+
+}
+
 
 module.exports = {
     registerStudent,
@@ -173,5 +252,6 @@ module.exports = {
     updateStudent,
     deleteStudent,
     uploadFile,
-    pendingAssignments
+    pendingAssignments,
+    submittedAssignment
 };

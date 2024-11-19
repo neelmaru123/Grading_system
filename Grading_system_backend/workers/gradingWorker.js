@@ -5,13 +5,10 @@ const geminiIntegration = require('./Gemini_Integration');
 const extractTextAndImagesFromPDF = require('./extract_pdf')
 
 gradingQueue.process(async (job) => {
-
-    console.log(job.data);
-    
+  console.log(job.data);
   const { studentId, assignmentId, filePath } = job.data;
 
   try {
-    
     // const extractedText = await pdfParser(pdfBuffer);
     const extractedText = await extractTextAndImagesFromPDF(filePath);
 

@@ -10,7 +10,8 @@ const {
     updateStudent,
     deleteStudent,
     uploadFile,
-    pendingAssignments
+    pendingAssignments,
+    submittedAssignment
 } = studentController;
 
 router
@@ -36,5 +37,9 @@ router
 router
     .route("/pendingAssignments")
     .post(pendingAssignments);
+
+router
+    .route("/submittedAssignment")
+    .post(submittedAssignment);
 
 module.exports = router;

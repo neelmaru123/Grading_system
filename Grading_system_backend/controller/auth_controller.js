@@ -13,8 +13,6 @@ const studentAuthenticator = async (req, res) => {
 
         const student = await studentModel.findOne({ email: email });
 
-        console.log(student);
-
         if (!student) {
             return res.status(400).json({status: true, message: "Invalid Email or Password" });
         }
@@ -22,14 +20,14 @@ const studentAuthenticator = async (req, res) => {
         const isPasswordCorrect = await bcrypt.compare(password, student.password);
 
         if(isPasswordCorrect){
-            const tokenData = {
-                studentId: student._id,
-                email: student.email,
-                type : "student"
-            }
 
-            const token = jwt.sign(tokenData, "22010101110", { expiresIn: "3h" });
-            return res.status(200).json({status: true, token: token, message: "Login Successful" });
+            // const tokenData = {
+            //     studentId: student._id,
+            //     email: student.email,
+            //     type : "student"
+            // }
+            // const token = jwt.sign(tokenData, "22010101110", { expiresIn: "3h" });
+            return res.status(200).json({status: true, data: student._id, message: "Login Successful" });
         }
         else{
             return res.status(400).json({status: true, message: "Invalid Email or Password" });
@@ -58,14 +56,14 @@ const facultyAuthenticator = async (req, res) => {
 
         if(isPasswordCorrect){
 
-            const tokenData = {
-                facultyId: faculty._id,
-                email: faculty.email,
-                type : "faculty"
-            }
+            // const tokenData = {
+            //     facultyId: faculty._id,
+            //     email: faculty.email,
+            //     type : "faculty"
+            // }
 
-            const token = jwt.sign(tokenData, "22010101110", { expiresIn: "3h" });
-            return res.status(200).json({status: true, token: token, message: "Login Successful" });
+            // const token = jwt.sign(tokenData, "22010101110", { expiresIn: "3h" });
+            return res.status(200).json({status: true, data: faculty._id, message: "Login Successful" });
         }
         else{
             return res.status(400).json({status: true, message: "Invalid Email or Password" });
