@@ -21,7 +21,7 @@ const studentSchema = new mongoose.Schema({
     department: {
         type: String,
         required: true
-    },
+    },          
     semester : {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Semester"

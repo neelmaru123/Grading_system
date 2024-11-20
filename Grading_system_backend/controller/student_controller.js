@@ -136,28 +136,20 @@ const uploadFile = async (req, res) => {
     if (req.files === undefined) {
         return res.status(400).send('Please upload a file!');
     }
-
     console.log(req.files?.file[0].path);
-
     const filePath = req.files?.file[0].path;
     const { studentId, assignmentId } = req.body;
-
     try {
-
         // const extractedText = await pdfParser(pdfBuffer);
         const extractedText = await extractTextAndImagesFromPDF(filePath);
-
         // Step 2: Call the Gemini API for grading
         geminiGrade = await geminiIntegration(extractedText.text);
-
         fs.unlink(filePath, (err) => {
             if (err) console.error(`Failed to delete file: ${filePath}`, err);
             else console.log(`File deleted: ${filePath}`);
         });
-
         console.log(geminiGrade.overallGrade);
         console.log(geminiGrade.overallFeedback);
-
         // Step 3: Update student's assignment grade in the database
         await Student.findByIdAndUpdate(
             studentId,
@@ -180,7 +172,6 @@ const uploadFile = async (req, res) => {
     } catch (error) {
         console.error(`Failed to process grading for student ${studentId}:`, error);
     }
-
     // // Add the job to the grading queue
     // gradingQueue.add({
     //     studentId: studentId,
@@ -192,17 +183,16 @@ const uploadFile = async (req, res) => {
     //         backoff: 5000 
     //     }
     // );
-
     // res.status(200).send('File uploaded successfully. Grading will be processed.');
 };
 
 const pendingAssignments = async (req, res) => {
     const { id } = req.body;
-    
     try {
         const pendingAssignments = await assignmentModel.find({
             'students.studentId': { $ne: id } // Only assignments where the student ID is not present
         });
+        pendingAssignments.reverse();
         res.status(200).json(pendingAssignments);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching pending assignments', error });
@@ -211,7 +201,6 @@ const pendingAssignments = async (req, res) => {
 
 const submittedAssignment = async (req, res) => {
     const { id } = req.body;
-
     const studentAssignments = await studentModel.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(id) } },
         { $unwind: "$assignments" },
@@ -239,9 +228,8 @@ const submittedAssignment = async (req, res) => {
             }
         }
     ]);
-
+    studentAssignments.reverse();
     res.status(200).json(studentAssignments);
-
 }
 
 

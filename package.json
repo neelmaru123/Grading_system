@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "grading_system": "file:",
+    "mongodb": "^6.10.0",
     "pdf-poppler": "^0.2.1",
     "tesseract.js": "^5.1.1"
   }

@@ -3,6 +3,7 @@ const studentModel = require('../models/student_model');
 const SemesterModel = require('../models/semester_model');
 const SubjectModel = require('../models/subject_model');
 const mongoose = require('mongoose');
+const { submittedAssignment } = require('./student_controller');
 
 const registerAssignment = async (req, res) => {
     // Validate request
@@ -12,6 +13,7 @@ const registerAssignment = async (req, res) => {
         });
     }
     const { title, description, deadline, facultyId, subjectId, subjectName } = req.body;
+    
 
     try {
         const semester = await SemesterModel.findOne({ 'subjects.subjectId': subjectId }).exec();
@@ -20,6 +22,7 @@ const registerAssignment = async (req, res) => {
                 message: "Semester not found"
             });
         }
+        
         // Create an Assignment
         const assignment = new assignmentModel({
             title,
@@ -55,6 +58,8 @@ const getAllAssignments = async (req, res) => {
                 totalStudents: semester.totalStudents
             };
         }))
+
+        assignmentsWithSemesterData.reverse();
 
         res.send(assignmentsWithSemesterData);
     }
@@ -166,6 +171,7 @@ const pendingStudents = async (req, res) => {
                 }
             }
         ]);
+        pendingStudents.reverse();
         res.status(200).json(pendingStudents);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching pending assignments', error });
@@ -192,7 +198,7 @@ const submittedStudents = async (req, res) => {
                 }
             }
         ]);
-
+        submittedStudents.reverse();
         res.status(200).json(submittedStudents);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching pending assignments', error });

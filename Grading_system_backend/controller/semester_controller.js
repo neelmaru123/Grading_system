@@ -1,14 +1,12 @@
 const SemesterSchema = require('../models/semester_model');
 
 const createSemester = async (req, res) => {
-    
         // Validate request
         if (!req.body) {
             return res.status(400).send({
                 message: "Semester content can not be empty"
             });
         }
-    
         const { semesterName, subjects, totalStudents } = req.body;
     
         // Create a Semester
@@ -17,7 +15,6 @@ const createSemester = async (req, res) => {
             subjects,
             totalStudents
         });
-    
         // Save Semester in the database
         await semester.save()
             .then(data => {
@@ -41,6 +38,7 @@ const getAllSemesters = async (req, res) => {
 }
 
 const getSemesterById = async (req, res) => {
+    console.log(req.params.id);
     await SemesterSchema.findById(req.params.id)
         .then(semester => {
             if (!semester) {

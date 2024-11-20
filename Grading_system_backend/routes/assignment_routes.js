@@ -15,6 +15,9 @@ const {
 router
     .route("/")
     .post(getAllAssignments)
+
+router
+    .route("/register")
     .post(registerAssignment);
 
 router
