@@ -4,6 +4,7 @@ const SemesterModel = require('../models/semester_model');
 const SubjectModel = require('../models/subject_model');
 const mongoose = require('mongoose');
 const { submittedAssignment } = require('./student_controller');
+const { Notification } = require('../models/notification_model');
 
 const registerAssignment = async (req, res) => {
     // Validate request
@@ -13,7 +14,7 @@ const registerAssignment = async (req, res) => {
         });
     }
     const { title, description, deadline, facultyId, subjectId, subjectName } = req.body;
-    
+
 
     try {
         const semester = await SemesterModel.findOne({ 'subjects.subjectId': subjectId }).exec();
@@ -22,7 +23,7 @@ const registerAssignment = async (req, res) => {
                 message: "Semester not found"
             });
         }
-        
+
         // Create an Assignment
         const assignment = new assignmentModel({
             title,
@@ -58,9 +59,17 @@ const getAllAssignments = async (req, res) => {
                 totalStudents: semester.totalStudents
             };
         }))
+        // Create notification for assignment upload
+        const notification = new Notification({
+            title: "New Assignment Uploaded",
+            message: `Assignment "${title}" has been uploaded, of ${subjectName}`,
+            facultyId,
+            semesterId: semester._id,
+            type: "all-semester"
+        });
+        await notification.save();
 
         assignmentsWithSemesterData.reverse();
-
         res.send(assignmentsWithSemesterData);
     }
     catch (err) {
@@ -111,12 +120,20 @@ const updateAssignment = async (req, res) => {
         pendingStudentsCount: req.body.pendingStudentsCount,
         subjectId: req.body.subjectId
     }, { new: true })
-        .then(assignment => {
+        .then(async (assignment) => {
             if (!assignment) {
                 return res.status(404).send({
                     message: "Assignment not found with id " + req.params.id
                 });
             }
+            // Create notification for assignment update
+            const notification = new Notification({
+                title: "Assignment Updated",
+                message: `Assignment "${req.body.title}" has been updated.`,
+                facultyId: req.body.facultyId,
+                semesterId: assignment.semesterId
+            });
+            await notification.save();
             res.send(assignment);
         }).catch(err => {
             if (err.kind === 'ObjectId') {

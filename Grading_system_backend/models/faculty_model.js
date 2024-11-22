@@ -25,7 +25,11 @@ const facultySchema = new mongoose.Schema({
                 ref: "Assignment"
             }
         }
-    ]
+    ],
+    lastNotificationFetch: {
+        type: Date,
+        default: Date.now
+    }
 }, { timestamps: true }, { collection: "faculties" });
 
 facultySchema.pre('save', async function(next) {

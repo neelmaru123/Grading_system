@@ -38,7 +38,6 @@ const getAllSemesters = async (req, res) => {
 }
 
 const getSemesterById = async (req, res) => {
-    console.log(req.params.id);
     await SemesterSchema.findById(req.params.id)
         .then(semester => {
             if (!semester) {

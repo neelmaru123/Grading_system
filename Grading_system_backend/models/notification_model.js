@@ -28,7 +28,21 @@ const notificationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        index : true
     }
 }, { timestamps: true }, { collection: "Notifications" });
+
+// Create a compound index on semesterId and type
+notificationSchema.index({ semesterId: 1, type: 1 });
+
+// Create an index on studentId
+notificationSchema.index({ studentId: 1 });
+
+// Create an index on facultyId
+notificationSchema.index({ facultyId: 1 });
 
 exports.Notification = mongoose.model("Notification", notificationSchema);

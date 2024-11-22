@@ -139,6 +139,7 @@ const uploadFile = async (req, res) => {
     console.log(req.files?.file[0].path);
     const filePath = req.files?.file[0].path;
     const { studentId, assignmentId } = req.body;
+
     try {
         // const extractedText = await pdfParser(pdfBuffer);
         const extractedText = await extractTextAndImagesFromPDF(filePath);
@@ -164,8 +165,15 @@ const uploadFile = async (req, res) => {
             },
             { new: true } // Return the updated document
         )
-            .then((updatedStudent) => {
+            .then(async (updatedStudent) => {
                 console.log(`Updated student: ${updatedStudent}`);
+                // Create notification for grade submission
+                const notification = new Notification({
+                    title: "Assignment Graded",
+                    message: `Your assignment has been graded of subject. Grade: ${geminiGrade.overallGrade}`,
+                    studentId: studentId
+                });
+                await notification.save();
             })
 
         console.log(`Grading completed for student: ${studentId}`);

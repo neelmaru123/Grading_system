@@ -29,6 +29,7 @@ const assignmentRoutes = require("./routes/assignment_routes");
 const authRoutes = require("./routes/auth_route");
 const semesterRoutes = require("./routes/semester_routes");
 const subjectRoutes = require("./routes/subject_routes");
+const notificationRoutes = require("./routes/notification_routes");
 
 // define a simple route
 app.use("/students", studentRoutes);
@@ -37,5 +38,5 @@ app.use("/assignments", assignmentRoutes);
 app.use("/auth", authRoutes);
 app.use("/semesters", semesterRoutes);
 app.use("/subjects", subjectRoutes);
-
+app.use("/notifications", notificationRoutes);
 

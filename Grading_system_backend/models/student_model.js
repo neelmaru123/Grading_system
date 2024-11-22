@@ -42,7 +42,11 @@ const studentSchema = new mongoose.Schema({
                 type: Date
             }
         }
-    ]
+    ],
+    lastNotificationFetch: {
+        type: Date,
+        default: Date.now
+    }
 }, { timestamps: true }, { collection: "students" });
 
 studentSchema.pre('save', async function(next) {
