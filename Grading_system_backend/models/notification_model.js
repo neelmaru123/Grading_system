@@ -45,4 +45,4 @@ notificationSchema.index({ studentId: 1 });
 // Create an index on facultyId
 notificationSchema.index({ facultyId: 1 });
 
-exports.Notification = mongoose.model("Notification", notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema)

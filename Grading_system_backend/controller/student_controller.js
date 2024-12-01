@@ -1,6 +1,7 @@
 const studentModel = require('../models/student_model');
 const assignmentModel = require('../models/assignment_model');
 const mongoose = require("mongoose");
+const AssignmentQueue = require('../models/AssignmentQueue_model');
 
 // Create and Save a new Student
 const registerStudent = async (req, res) => {
@@ -127,71 +128,109 @@ const deleteStudent = async (req, res) => {
         });
 }
 
-const gradingQueue = require('../queues/gradingQueue');
-const extractTextAndImagesFromPDF = require('../workers/extract_pdf');
-const geminiIntegration = require('../workers/Gemini_Integration')
-const fs = require('fs')
+// const uploadFile = async (req, res) => {
+//     if (req.files === undefined) {
+//         return res.status(400).send('Please upload a file!');
+//     }
+//     console.log(req.files?.file[0].path);
+//     const filePath = req.files?.file[0].path;
+//     const { studentId, assignmentId } = req.body;
+
+//     try {
+//         const assignment = await assignmentModel.findById(assignmentId);
+//         const extractedText = await extractTextAndImagesFromPDF(filePath);
+//         // Step 2: Call the Gemini API for grading
+//         const assignmentGrade = await callPythonAPI({
+//             sample: assignment.description,
+//             assignment: extractedText.text
+//         });
+//         fs.unlink(filePath, (err) => {
+//             if (err) console.error(`Failed to delete file: ${filePath}`, err);
+//             else console.log(`File deleted: ${filePath}`);
+//         });;
+
+//         // Step 3: Update student's assignment grade in the database
+//         await student.findByIdAndUpdate(
+//             studentId,
+//             {
+//                 $push: {
+//                     assignments: {
+//                         assignmentId: assignmentId,
+//                         grade: assignmentGrade.grade,
+//                         remarks: assignmentGrade.remarks,
+//                     }
+//                 }
+//             },
+//             { new: true } // Return the updated document
+//         )
+//             .then(async (updatedStudent) => {
+//                 console.log(`Updated student: ${updatedStudent}`);
+//                 // Create notification for grade submission
+//                 const notification = new Notification({
+//                     title: "Assignment Graded",
+//                     message: `Your assignment has been graded of subject. Grade: ${assignmentGrade.grade}`,
+//                     studentId: studentId,
+//                     type: "student"
+//                 });
+//                 await notification.save();
+//             })
+
+//         await assignmentModel.findByIdAndUpdate(
+//             assignmentId,
+//             $push = {
+//                 students: {
+//                     studentId: studentId,
+//                     grade: assignmentGrade.grade,
+//                 }
+//             }
+//         )
+//             .then((updatedAssignment) => {
+//                 console.log(`Updated assignment: ${updatedAssignment}`);
+//             })
+//         res.send(assignmentGrade)
+//         // console.log(`Grading completed for student: ${studentId}`);
+//     } catch (error) {
+//         console.error(`Failed to process grading for student ${studentId}:`, error);
+//     }
+//     // // Add the job to the grading queue
+//     // gradingQueue.add({
+//     //     studentId: studentId,
+//     //     assignmentId: assignmentId,
+//     //     filePath: filePath
+//     // },
+//     //     {
+//     //         attempts: 3,  
+//     //         backoff: 5000 
+//     //     }
+//     // );
+//     // res.status(200).send('File uploaded successfully. Grading will be processed.');
+// };
 
 const uploadFile = async (req, res) => {
     if (req.files === undefined) {
         return res.status(400).send('Please upload a file!');
     }
-    console.log(req.files?.file[0].path);
-    const filePath = req.files?.file[0].path;
+
+    const filePath = req.files.file[0].path;
     const { studentId, assignmentId } = req.body;
 
     try {
-        // const extractedText = await pdfParser(pdfBuffer);
-        const extractedText = await extractTextAndImagesFromPDF(filePath);
-        // Step 2: Call the Gemini API for grading
-        geminiGrade = await geminiIntegration(extractedText.text);
-        fs.unlink(filePath, (err) => {
-            if (err) console.error(`Failed to delete file: ${filePath}`, err);
-            else console.log(`File deleted: ${filePath}`);
-        });
-        console.log(geminiGrade.overallGrade);
-        console.log(geminiGrade.overallFeedback);
-        // Step 3: Update student's assignment grade in the database
-        await Student.findByIdAndUpdate(
+        // Save file path and details to the queue
+        const queueItem = new AssignmentQueue({
             studentId,
-            {
-                $push: {
-                    assignments: {
-                        assignmentId: assignmentId,
-                        grade: geminiGrade.overallGrade,
-                        remarks: geminiGrade.overallFeedback
-                    }
-                }
-            },
-            { new: true } // Return the updated document
-        )
-            .then(async (updatedStudent) => {
-                console.log(`Updated student: ${updatedStudent}`);
-                // Create notification for grade submission
-                const notification = new Notification({
-                    title: "Assignment Graded",
-                    message: `Your assignment has been graded of subject. Grade: ${geminiGrade.overallGrade}`,
-                    studentId: studentId
-                });
-                await notification.save();
-            })
+            assignmentId,
+            filePath,
+            status: 'pending'
+        });
+        await queueItem.save();
 
-        console.log(`Grading completed for student: ${studentId}`);
-    } catch (error) {
-        console.error(`Failed to process grading for student ${studentId}:`, error);
+        res.send({ message: 'File uploaded and task added to queue' });
+    } catch (err) {
+        console.error('Error saving file and path:', err);
+        res.status(500).send({
+            message: err.message || 'Some error occurred while saving the file and path.'
+        });
     }
-    // // Add the job to the grading queue
-    // gradingQueue.add({
-    //     studentId: studentId,
-    //     assignmentId: assignmentId,
-    //     filePath: filePath
-    // },
-    //     {
-    //         attempts: 3,  
-    //         backoff: 5000 
-    //     }
-    // );
-    // res.status(200).send('File uploaded successfully. Grading will be processed.');
 };
 
 const pendingAssignments = async (req, res) => {

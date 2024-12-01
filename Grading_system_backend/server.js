@@ -40,3 +40,9 @@ app.use("/semesters", semesterRoutes);
 app.use("/subjects", subjectRoutes);
 app.use("/notifications", notificationRoutes);
 
+const { processQueue } = require('./workers/processQueue');
+
+setInterval(async () => {
+    await processQueue();
+}, 10000); // Check every 10 seconds
+

@@ -38,7 +38,8 @@ const assignmentSchema = new mongoose.Schema({
     ],
     pendingStudentsCount: {
         type: Number
-    }
+    },
+    
 }, { timestamps: true }, {collection : "Assignments"});
 
 module.exports = mongoose.model("Assignment", assignmentSchema)

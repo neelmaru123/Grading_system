@@ -47,7 +47,6 @@ const registerAssignment = async (req, res) => {
 
 const getAllAssignments = async (req, res) => {
     const { facultyId } = req.body;
-
     try {
         const assignment = await assignmentModel.find({ facultyId: facultyId })
         const assignmentsWithSemesterData = await Promise.all(assignment.map(async (assignment) => {
@@ -59,15 +58,15 @@ const getAllAssignments = async (req, res) => {
                 totalStudents: semester.totalStudents
             };
         }))
-        // Create notification for assignment upload
-        const notification = new Notification({
-            title: "New Assignment Uploaded",
-            message: `Assignment "${title}" has been uploaded, of ${subjectName}`,
-            facultyId,
-            semesterId: semester._id,
-            type: "all-semester"
-        });
-        await notification.save();
+        // // Create notification for assignment upload
+        // const notification = new Notification({
+        //     title: "New Assignment Uploaded",
+        //     message: `Assignment "${title}" has been uploaded, of ${subjectName}`,
+        //     facultyId,
+        //     semesterId: semester._id,
+        //     type: "all-semester"
+        // });
+        // await notification.save();
 
         assignmentsWithSemesterData.reverse();
         res.send(assignmentsWithSemesterData);
