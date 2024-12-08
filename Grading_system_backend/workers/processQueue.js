@@ -48,10 +48,13 @@ const processQueue = async () => {
                     .then(async (updatedStudent) => {
                         console.log(`Updated student: ${updatedStudent}`);
                         // Create notification for grade submission
+                        const createdAt = new Date();
+                        createdAt.setDate(createdAt.getDate() + 1);
                         const notification = new Notification({
                             title: "Assignment Graded",
                             message: `Your assignment has been graded of subject. Grade: ${assignmentGrade.grade}`,
                             studentId: studentId,
+                            createdAt: createdAt,
                             type: "student"
                         });
                         await notification.save();

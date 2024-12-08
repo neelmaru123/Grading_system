@@ -4,8 +4,6 @@ const student = require("../models/student_model");
 const getNotificationsForSemseter = async (req, res) => {
     const { id } = req.params;
     try {
-        const stu = await student.findById(id);
-        const lastFetch = stu.lastNotificationFetch;
         const notifications = await Notification.find({
             createdAt: {
                 $gte: lastFetch
@@ -17,6 +15,7 @@ const getNotificationsForSemseter = async (req, res) => {
         res.send(notifications);
     }
     catch (err) {
+        console.log(err);
         res.status(500).send({
             mesaage: err.mesaage || "some error occures while retrieving notifications."
         })
@@ -27,9 +26,11 @@ const getNotificationsForStudent = async (req, res) => {
     const { id } = req.params;
     try {
         const notifications = await Notification.find({
-            studentId: id
+            studentId: id,
+            createdAt : {
+                $lte: Date.now()
+            }
         }).sort({ createdAt: -1 }); // Find the notifications for the student
-
         res.send(notifications);
     }
     catch (err) {
