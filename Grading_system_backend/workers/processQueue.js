@@ -40,6 +40,7 @@ const processQueue = async () => {
                                 assignmentId: assignmentId,
                                 grade: assignmentGrade.grade,
                                 remarks: assignmentGrade.remarks,
+                                submissionDate: Date.now()
                             }
                         }
                     },
@@ -66,6 +67,8 @@ const processQueue = async () => {
                         students: {
                             studentId: studentId,
                             grade: assignmentGrade.grade,
+                            remarks: assignmentGrade.remarks,
+                            submissionDate: Date.now()
                         }
                     }
                 )

@@ -33,6 +33,12 @@ const assignmentSchema = new mongoose.Schema({
             },
             grade: {
                 type: String
+            },
+            remarks: {
+                type: String
+            },
+            submissionDate: {
+                type: Date
             }
         }
     ],

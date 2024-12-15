@@ -197,25 +197,66 @@ const pendingStudents = async (req, res) => {
 const submittedStudents = async (req, res) => {
     const { id } = req.body;
     try {
-        const assignment = await assignmentModel.findOne({
-            _id: id,
-            // subjectId: subjectId
-        }).select('students')
-
-        if (!assignment) {
-            return res.status(404).json({ message: 'Assignment not found' });
-        }
-
-        const submittedStudentIds = assignment.students.map(student => student.studentId);
-        const submittedStudents = await studentModel.aggregate([
+        const submissions = await assignmentModel.aggregate([
+            // Match the specific assignment (optional if all assignments are needed)
             {
                 $match: {
-                    _id: { $in: submittedStudentIds }
+                    _id: new mongoose.Types.ObjectId(id) // Replace `assignmentId` with the actual assignment ID
+                }
+            },
+            // Unwind the students array to process individual student submissions
+            {
+                $unwind: "$students"
+            },
+            // Lookup student details from the students collection
+            {
+                $lookup: {
+                    from: "students", // Name of the student collection
+                    localField: "students.studentId",
+                    foreignField: "_id",
+                    as: "studentDetails"
+                }
+            },
+            // Unwind the studentDetails array to make it accessible
+            {
+                $unwind: "$studentDetails"
+            },
+            // Project the required fields
+            {
+                $project: {
+                    _id: 0, // Exclude the document ID
+                    submissionDate: "$students.submissionDate", // From the assignments schema
+                    subjectName: "$subjectName", // From the assignments schema
+                    title: "$title", // From the assignments schema
+                    rollNo: "$studentDetails.rollNo", // From the student schema
+                    grade: "$students.grade", // Grade from the assignments schema
+                    remarks: "$students.remarks", // Remarks from the assignments schema
+                    studentName: "$studentDetails.name", // Student's name
+                    email: "$studentDetails.email", // Student's email
+                    department: "$studentDetails.department" // Student's department
                 }
             }
         ]);
-        submittedStudents.reverse();
-        res.status(200).json(submittedStudents);
+        
+        // const assignment = await assignmentModel.findOne({
+        //     _id: id,
+        //     // subjectId: subjectId
+        // }).select('students')
+
+        // if (!assignment) {
+        //     return res.status(404).json({ message: 'Assignment not found' });
+        // }
+
+        // const submittedStudentIds = assignment.students.map(student => student.studentId);
+        // const submittedStudents = await studentModel.aggregate([
+        //     {
+        //         $match: {
+        //             _id: { $in: submittedStudentIds }
+        //         }
+        //     }
+        // ]);
+        submissions.reverse();
+        res.status(200).json(submissions);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching pending assignments', error });
     }

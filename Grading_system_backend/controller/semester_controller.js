@@ -1,30 +1,30 @@
 const SemesterSchema = require('../models/semester_model');
 
 const createSemester = async (req, res) => {
-        // Validate request
-        if (!req.body) {
-            return res.status(400).send({
-                message: "Semester content can not be empty"
-            });
-        }
-        const { semesterName, subjects, totalStudents } = req.body;
-    
-        // Create a Semester
-        const semester = new SemesterSchema({
-            semesterName,
-            subjects,
-            totalStudents
+    // Validate request
+    if (!req.body) {
+        return res.status(400).send({
+            message: "Semester content can not be empty"
         });
-        // Save Semester in the database
-        await semester.save()
-            .then(data => {
-                res.send(data);
-            }).catch(err => {
-                res.status(500).send({
-                    message: err.message || "Some error occurred while creating the Semester."
-                });
-            });
     }
+    const { semesterName, subjects, totalStudents } = req.body;
+
+    // Create a Semester
+    const semester = new SemesterSchema({
+        semesterName,
+        subjects,
+        totalStudents
+    });
+    // Save Semester in the database
+    await semester.save()
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Some error occurred while creating the Semester."
+            });
+        });
+}
 
 const getAllSemesters = async (req, res) => {
     await SemesterSchema.find()
@@ -112,7 +112,7 @@ const deleteSemester = async (req, res) => {
         });
 }
 
-const getSemesterByFaculty = async(req, res) => {
+const getSemesterByFaculty = async (req, res) => {
     await SemesterSchema.find({ "subjects.facultyId": req.params.facultyId })
         .then(semesters => {
             res.send(semesters);

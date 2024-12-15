@@ -43,8 +43,8 @@ const getNotificationsForStudent = async (req, res) => {
 const getLatestNotificationForStudent = async (req, res) => {
     const { id } = req.params;
     try {
-        const std = await student.findById(id); // Find the student
-        const lastFetch = std.lastNotificationFetch; // Get the last fetch time
+        const stu = await student.findById(id); // Find the student        
+        const lastFetch = stu.lastNotificationFetch; // Get the last fetch time
         const notifications = await Notification.find({
             createdAt: {
                 $gte: lastFetch
@@ -52,6 +52,7 @@ const getLatestNotificationForStudent = async (req, res) => {
         }).sort({ createdAt: -1 });
         stu.lastNotificationFetch = Date.now(); // Update the last fetch time
         await stu.save();
+        notifications.reverse();
         res.send(notifications);
     }
     catch (err) {
